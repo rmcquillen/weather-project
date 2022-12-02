@@ -1,5 +1,6 @@
 using System.IO;
 using Microsoft.AspNetCore.Builder;
+using Microsoft.AspNetCore.Cors.Infrastructure;
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.AspNetCore.HttpsPolicy;
 using Microsoft.AspNetCore.SpaServices.ReactDevelopmentServer;
@@ -16,6 +17,7 @@ namespace InterviewProject
             Configuration = configuration;
         }
 
+        private const string CorsPolicy = "CorsPolicy";
         public IConfiguration Configuration { get; }
 
         // This method gets called by the runtime. Use this method to add services to the container.
@@ -23,6 +25,15 @@ namespace InterviewProject
         {
 
             services.AddControllersWithViews();
+
+            services.AddCors(options =>
+            {
+              options.AddPolicy(name: CorsPolicy,
+                policy =>
+                {
+                  policy.AllowAnyOrigin().AllowAnyMethod().AllowAnyHeader();
+                });
+            });
 
             // In production, the React files will be served from this directory
             services.AddSpaStaticFiles(configuration =>
@@ -45,6 +56,7 @@ namespace InterviewProject
                 app.UseHsts();
             }
 
+            app.UseCors(CorsPolicy);
             app.UseHttpsRedirection();
             app.UseStaticFiles();
             app.UseSpaStaticFiles();
