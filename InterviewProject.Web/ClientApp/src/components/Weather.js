@@ -5,7 +5,10 @@ export class Weather extends Component {
 
   constructor(props) {
     super(props);
-    this.state = { forecasts: [], loading: true };
+    this.state = { forecasts: [], loading: true, location: "" };
+
+    this.handleChange = this.handleChange.bind(this);
+    this.handleSubmit = this.handleSubmit.bind(this);
   }
 
   componentDidMount() {
@@ -27,9 +30,9 @@ export class Weather extends Component {
           {forecasts.map(forecast =>
             <tr key={forecast.date}>
               <td>{forecast.date}</td>
-              <td>{forecast.temperatureC}</td>
-              <td>{forecast.temperatureF}</td>
-              <td>{forecast.summary}</td>
+              <td>{forecast.temperature.maximum.value}</td>
+              <td>{Math.round(32 + (forecast.temperature.maximum.value / 0.5556))}</td>
+              <td>{forecast.day.iconPhrase}</td>
             </tr>
           )}
         </tbody>
@@ -45,15 +48,36 @@ export class Weather extends Component {
     return (
       <div>
         <h1 id="tabelLabel" >Weather forecast</h1>
-        <p>This component demonstrates fetching data from the server.</p>
+        <form onSubmit={this.handleSubmit}>
+          <input
+            type="text"
+            placeholder="Enter location..."
+            onChange={this.handleChange} />
+          <input type="submit" value="Go!" />
+        </form>
         {contents}
       </div>
     );
   }
 
-  async populateWeatherData() {
-    const response = await fetch('weatherforecast');
+  handleChange = (e) => {
+    e.preventDefault();
+    this.setState({ location: e.target.value });
+  };
+
+  handleSubmit(e) {
+    e.preventDefault();
+    this.populateWeatherData(this.state.location);
+  };
+
+  async populateWeatherData(location) {
+    if (location === undefined) {
+      location = '';
+    }
+
+    const response = await fetch('http://localhost:5000/weatherforecast/' + location);
+
     const data = await response.json();
-    this.setState({ forecasts: data, loading: false });
-  }
+
+    this.setState({ forecasts: data.dailyForecasts, loading: false });  }
 }
