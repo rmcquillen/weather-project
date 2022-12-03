@@ -35,8 +35,14 @@ namespace InterviewProject.Controllers
             _appSettings = optionsMonitor.CurrentValue;
         }
 
-        [HttpGet("{location?}")]
-        public async Task<FiveDayForecast> GetByLocation(string location = "Cleveland")
+        [HttpGet()]
+        public async Task<FiveDayForecast> Get()
+        {
+            return await GetByLocation(_appSettings.DefaultCity);
+        }
+
+        [HttpGet("{location}")]
+        public async Task<FiveDayForecast> GetByLocation(string location)
         {
             string locationKey;
             FiveDayForecast fiveDayForecast;
@@ -117,7 +123,7 @@ namespace InterviewProject.Controllers
         private async Task<FiveDayForecast> GetFiveDayForecast(string locationKey)
         {
             using var response = await httpClient.GetAsync("http://dataservice.accuweather.com/forecasts/v1/daily/5day/" + locationKey + "?metric=true&apikey=" + _appSettings.AccuWeatherDevAPIKey);
-            
+
             if (response.StatusCode == HttpStatusCode.Unauthorized)
             {
                 _logger.LogError("AccuWeather API key is not authorized to call 5 Days of Daily Forecasts API");
