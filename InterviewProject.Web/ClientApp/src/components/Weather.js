@@ -5,7 +5,7 @@ export class Weather extends Component {
 
   constructor(props) {
     super(props);
-    this.state = { forecasts: [], loading: true, location: "" };
+    this.state = { summary: "", forecasts: [], loading: true, location: "" };
 
     this.handleChange = this.handleChange.bind(this);
     this.handleSubmit = this.handleSubmit.bind(this);
@@ -15,39 +15,43 @@ export class Weather extends Component {
     this.populateWeatherData();
   }
 
-  static renderForecastsTable(forecasts) {
+  static renderForecastsTable(summary, forecasts) {
     return (
-      <table className='table table-striped' aria-labelledby="tabelLabel">
-        <thead>
-          <tr>
-            <th>Date</th>
-            <th>Temp. (C)</th>
-            <th>Temp. (F)</th>
-            <th>Summary</th>
-          </tr>
-        </thead>
-        <tbody>
-          {forecasts.map(forecast =>
-            <tr key={forecast.date}>
-              <td>{forecast.dateString}</td>
-              <td>{forecast.temperature.maximum.value} &deg;C</td>
-              <td>{Math.round(32 + (forecast.temperature.maximum.value / 0.5556))} &deg;F</td>
-              <td>{forecast.day.iconPhrase}</td>
+      <div>
+        <h2 id="locationLabel">Your 5 Day Summary:</h2>
+        <h4>{summary}</h4>
+        <table className='table table-striped' aria-labelledby="tableLabel">
+          <thead>
+            <tr>
+              <th>Date</th>
+              <th>Temp. (C)</th>
+              <th>Temp. (F)</th>
+              <th>Summary</th>
             </tr>
-          )}
-        </tbody>
-      </table>
+          </thead>
+          <tbody>
+            {forecasts.map(forecast =>
+              <tr key={forecast.date}>
+                <td>{forecast.dateString}</td>
+                <td>{forecast.temperature.maximum.value} &deg;C</td>
+                <td>{Math.round(32 + (forecast.temperature.maximum.value / 0.5556))} &deg;F</td>
+                <td>{forecast.day.iconPhrase}</td>
+              </tr>
+            )}
+          </tbody>
+        </table>
+      </div>
     );
   }
 
   render() {
     let contents = this.state.loading
       ? <p><em>Loading...</em></p>
-      : Weather.renderForecastsTable(this.state.forecasts);
+      : Weather.renderForecastsTable(this.state.summary, this.state.forecasts);
 
     return (
       <div>
-        <h1 id="tabelLabel" >5 Day Weather Forecast</h1>
+        <h1 id="tableLabel" >5 Day Weather Forecast</h1>
         <form onSubmit={this.handleSubmit}>
           <input
             type="text"
@@ -55,6 +59,7 @@ export class Weather extends Component {
             onChange={this.handleChange} />
           <input type="submit" value="Go!" />
         </form>
+        <br />
         {contents}
       </div>
     );
@@ -79,5 +84,5 @@ export class Weather extends Component {
 
     const data = await response.json();
 
-    this.setState({ forecasts: data.dailyForecasts, loading: false });  }
+    this.setState({ summary: data.headline.text, forecasts: data.dailyForecasts, loading: false });  }
 }
