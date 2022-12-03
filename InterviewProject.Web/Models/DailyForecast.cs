@@ -6,6 +6,8 @@ namespace InterviewProject.Models
     {
         public DateTime Date { get; set; }
 
+        public string DateString => Date.ToString("dddd, MMMM d");
+
         public Temperature Temperature { get; set; }
 
         public Day Day { get; set; }
