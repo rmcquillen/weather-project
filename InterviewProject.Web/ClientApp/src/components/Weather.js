@@ -30,8 +30,8 @@ export class Weather extends Component {
           {forecasts.map(forecast =>
             <tr key={forecast.date}>
               <td>{forecast.date}</td>
-              <td>{forecast.temperature.maximum.value}</td>
-              <td>{Math.round(32 + (forecast.temperature.maximum.value / 0.5556))}</td>
+              <td>{forecast.temperature.maximum.value} &deg;C</td>
+              <td>{Math.round(32 + (forecast.temperature.maximum.value / 0.5556))} &deg;F</td>
               <td>{forecast.day.iconPhrase}</td>
             </tr>
           )}
@@ -47,7 +47,7 @@ export class Weather extends Component {
 
     return (
       <div>
-        <h1 id="tabelLabel" >Weather forecast</h1>
+        <h1 id="tabelLabel" >5 Day Weather Forecast</h1>
         <form onSubmit={this.handleSubmit}>
           <input
             type="text"
