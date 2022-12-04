@@ -75,6 +75,13 @@ namespace InterviewProject.Controllers
 
                 return new LocationKey();
             }
+            else if (response.StatusCode == HttpStatusCode.ServiceUnavailable)
+            {
+                _logger.LogError("Error occurred during call to AccuWeather API. API key may be exceeding service limits.\nStatus Code: {statusCode}, Reason: {reason}",
+                    response.StatusCode, response.ReasonPhrase);
+
+                return null;
+            }
             else if (response.IsSuccessStatusCode)
             {
                 string apiResponse = await response.Content.ReadAsStringAsync();
@@ -127,6 +134,13 @@ namespace InterviewProject.Controllers
             if (response.StatusCode == HttpStatusCode.Unauthorized)
             {
                 _logger.LogError("AccuWeather API key is not authorized to call 5 Days of Daily Forecasts API");
+
+                return null;
+            }
+            else if (response.StatusCode == HttpStatusCode.ServiceUnavailable)
+            {
+                _logger.LogError("Error occurred during call to AccuWeather API. API key may be exceeding service limits.\nStatus Code: {statusCode}, Reason: {reason}",
+                    response.StatusCode, response.ReasonPhrase);
 
                 return null;
             }
