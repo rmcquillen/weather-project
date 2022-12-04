@@ -5,7 +5,7 @@ export class Weather extends Component {
 
   constructor(props) {
     super(props);
-    this.state = { summary: "", forecasts: [], loading: true, location: "" };
+    this.state = { summary: "", forecasts: [], loading: true, locationInput: "", forecastLocation: "" };
 
     this.handleChange = this.handleChange.bind(this);
     this.handleSubmit = this.handleSubmit.bind(this);
@@ -15,10 +15,10 @@ export class Weather extends Component {
     this.populateWeatherData();
   }
 
-  static renderForecastsTable(summary, forecasts) {
+  static renderForecastsTable(summary, forecasts, location) {
     return (
       <div>
-        <h2 id="locationLabel">Your 5 Day Summary:</h2>
+        <h2 id="locationLabel">Your 5 Day Summary for {location}:</h2>
         <h4>{summary}</h4>
         <table className='table table-striped' aria-labelledby="tableLabel">
           <thead>
@@ -47,7 +47,7 @@ export class Weather extends Component {
   render() {
     let contents = this.state.loading
       ? <p><em>Loading...</em></p>
-      : Weather.renderForecastsTable(this.state.summary, this.state.forecasts);
+      : Weather.renderForecastsTable(this.state.summary, this.state.forecasts, this.state.forecastLocation);
 
     return (
       <div>
@@ -67,12 +67,12 @@ export class Weather extends Component {
 
   handleChange = (e) => {
     e.preventDefault();
-    this.setState({ location: e.target.value });
+    this.setState({ locationInput: e.target.value });
   };
 
   handleSubmit(e) {
     e.preventDefault();
-    this.populateWeatherData(this.state.location);
+    this.populateWeatherData(this.state.locationInput);
   };
 
   async populateWeatherData(location) {
@@ -84,5 +84,5 @@ export class Weather extends Component {
 
     const data = await response.json();
 
-    this.setState({ summary: data.headline.text, forecasts: data.dailyForecasts, loading: false });  }
+    this.setState({ summary: data.headline.text, forecasts: data.dailyForecasts, loading: false, forecastLocation: data.location });  }
 }

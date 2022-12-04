@@ -8,5 +8,7 @@ namespace InterviewProject.Models
         public Headline Headline { get; set; }
 
         public List<DailyForecast> DailyForecasts { get; set; }
+
+        public string Location { get; set; }
     }
 }
