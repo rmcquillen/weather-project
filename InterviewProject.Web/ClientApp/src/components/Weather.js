@@ -5,7 +5,7 @@ export class Weather extends Component {
 
   constructor(props) {
     super(props);
-    this.state = { summary: "", forecasts: [], loading: true, locationInput: "", forecastLocation: "" };
+    this.state = { summary: "", forecasts: [], loading: true, locationInput: "", forecastLocation: "", invalid: false };
 
     this.handleChange = this.handleChange.bind(this);
     this.handleSubmit = this.handleSubmit.bind(this);
@@ -55,9 +55,12 @@ export class Weather extends Component {
         <form onSubmit={this.handleSubmit}>
           <input
             type="text"
+            className={this.state.invalid ? "border-danger" : ""}
             placeholder="Enter location..."
+            required="required"
             onChange={this.handleChange} />
           <input type="submit" value="Go!" />
+          {this.state.invalid && <p>No results found for "{this.state.locationInput}"</p>}
         </form>
         <br />
         {contents}
@@ -84,5 +87,11 @@ export class Weather extends Component {
 
     const data = await response.json();
 
-    this.setState({ summary: data.headline.text, forecasts: data.dailyForecasts, loading: false, forecastLocation: data.location });  }
+    if (data.dailyForecasts === null) {
+      this.setState({ invalid: true });
+    }
+    else {
+      this.setState({ summary: data.headline.text, forecasts: data.dailyForecasts, loading: false, forecastLocation: data.location, invalid: false });
+    }
+  }
 }
