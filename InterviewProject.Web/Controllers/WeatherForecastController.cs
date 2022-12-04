@@ -36,14 +36,22 @@ namespace InterviewProject.Controllers
         [HttpGet("{location}")]
         public async Task<FiveDayForecast> GetByLocation(string location)
         {
-            string locationKey;
+            LocationKey locationKey;
             FiveDayForecast fiveDayForecast;
 
             using (httpClient = new HttpClient())
             {
                 // In order to retrieve the five day forecast, a unique location key is needed for the AccuWeather API
                 locationKey = await GetLocationKey(location);
-                fiveDayForecast = await GetFiveDayForecast(locationKey);
+                if (string.IsNullOrEmpty(locationKey.Key) == false)
+                {
+                    fiveDayForecast = await GetFiveDayForecast(locationKey.Key);
+                    fiveDayForecast.Location = $"{locationKey.EnglishName}, {locationKey.AdministrativeArea.EnglishName}";
+                }
+                else
+                {
+                    fiveDayForecast = new FiveDayForecast();
+                }
             }
 
             return fiveDayForecast;
@@ -57,7 +65,7 @@ namespace InterviewProject.Controllers
         /// <returns>A unique "location key" that can be passed to other AccuWeather APIs (for example, to retrieve a forecast for that location)
         /// OR an empty string if lookup is not successful
         /// </returns>
-        private async Task<string> GetLocationKey(string location)
+        private async Task<LocationKey> GetLocationKey(string location)
         {
             using var response = await httpClient.GetAsync("http://dataservice.accuweather.com/locations/v1/cities/search?apikey=" + _appSettings.AccuWeatherDevAPIKey + "&q=" + location);
 
@@ -65,7 +73,7 @@ namespace InterviewProject.Controllers
             {
                 _logger.LogError("AccuWeather API key is not authorized to call City Search API");
 
-                return string.Empty;
+                return new LocationKey();
             }
             else if (response.IsSuccessStatusCode)
             {
@@ -80,13 +88,13 @@ namespace InterviewProject.Controllers
 
                     if (locationKey != null)
                     {
-                        return locationKey.Key;
+                        return locationKey;
                     }
                     else
                     {
                         _logger.LogError("No location key was returned by AccuWeather City Search API for location: {location}", location);
 
-                        return string.Empty;
+                        return new LocationKey();
                     }
                 }
                 catch (JsonException e)
@@ -94,7 +102,7 @@ namespace InterviewProject.Controllers
                     _logger.LogError("Error occurred during deserialization of AccuWeather city search\nError: {errorMessage}\nAPI Response: {response}",
                         e.Message, apiResponse);
 
-                    return string.Empty;
+                    return new LocationKey();
                 }
             }
             else
@@ -102,7 +110,7 @@ namespace InterviewProject.Controllers
                 _logger.LogError("Error occurred during call to AccuWeather City Search API\nStatus Code: {statusCode}, Reason: {reason}",
                     response.StatusCode, response.ReasonPhrase);
 
-                return string.Empty;
+                return new LocationKey();
             }
         }
 
