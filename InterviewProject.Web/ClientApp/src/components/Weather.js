@@ -33,8 +33,8 @@ export class Weather extends Component {
             {forecasts.map(forecast =>
               <tr key={forecast.date}>
                 <td>{forecast.dateString}</td>
-                <td>{forecast.temperature.maximum.value} &deg;C</td>
-                <td>{Math.round(32 + (forecast.temperature.maximum.value / 0.5556))} &deg;F</td>
+                <td>{forecast.temperature.maximum.valueC} &deg;C</td>
+                <td>{forecast.temperature.maximum.valueF} &deg;F</td>
                 <td>{forecast.day.iconPhrase}</td>
               </tr>
             )}
