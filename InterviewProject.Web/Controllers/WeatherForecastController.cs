@@ -97,8 +97,7 @@ namespace InterviewProject.Controllers
                 }
                 catch (JsonException e)
                 {
-                    _logger.LogError("Error occurred during deserialization of AccuWeather city search\nError: {errorMessage}\nAPI Response: {response}",
-                        e.Message, apiResponse);
+                    HandleDeserializationException(e, apiResponse, CITY_SEARCH_API);
 
                     return new LocationKey();
                 }
@@ -131,8 +130,7 @@ namespace InterviewProject.Controllers
                 }
                 catch (JsonException e)
                 {
-                    _logger.LogError("Error occurred during deserialization of AccuWeather 5 Days of Daily Forecasts API call\nError: {errorMessage}, Response: {response}",
-                        e.Message, apiResponse);
+                    HandleDeserializationException(e, apiResponse, FIVE_DAYS_FORECAST_API);
 
                     return null;
                 }
@@ -159,6 +157,11 @@ namespace InterviewProject.Controllers
                     _logger.LogError($"Error occurred during call to AccuWeather {apiName} API\nStatus Code: {response.StatusCode}, Reason: {response.ReasonPhrase}");
                     break;
             }
+        }
+
+        private void HandleDeserializationException(JsonException e, string apiResponse, string apiName)
+        {
+            _logger.LogError($"Error occurred during deserialization of AccuWeather {apiName} API\nError: {e.Message}\nAPI Response: {apiResponse}");
         }
     }
 }
