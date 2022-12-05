@@ -75,7 +75,7 @@ export class Weather extends Component {
 
   handleSubmit(e) {
     e.preventDefault();
-    this.setState({ submittedLocation: this.state.locationInput });
+    this.setState({ submittedLocation: this.state.locationInput, invalid: false });
     this.populateWeatherData(this.state.locationInput);
   };
 
