@@ -4,6 +4,10 @@ namespace InterviewProject.Tests
 {
     public class WeatherTests
     {
+        /// <summary>
+        /// Testing the conversion from Celcius to Fahrenheit. If the calculation ever changes, we want this test to
+        /// catch that the conversion could potentially be broken or unintentionally altering part of the application.
+        /// </summary>
         [Fact]
         public void TestFahrenheitCalculation()
         {
