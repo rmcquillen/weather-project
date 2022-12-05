@@ -21,6 +21,10 @@ namespace InterviewProject.Controllers
 
         private readonly AppSettings _appSettings;
 
+        private const string CITY_SEARCH_API = "City Search";
+
+        private const string FIVE_DAYS_FORECAST_API = "5 Days of Daily Forecasts";
+
         public WeatherForecastController(ILogger<WeatherForecastController> logger, IOptionsMonitor<AppSettings> optionsMonitor)
         {
             _logger = logger;
@@ -69,20 +73,7 @@ namespace InterviewProject.Controllers
         {
             using var response = await httpClient.GetAsync("http://dataservice.accuweather.com/locations/v1/cities/search?apikey=" + _appSettings.AccuWeatherDevAPIKey + "&q=" + location);
 
-            if (response.StatusCode == HttpStatusCode.Unauthorized)
-            {
-                _logger.LogError("AccuWeather API key is not authorized to call City Search API");
-
-                return new LocationKey();
-            }
-            else if (response.StatusCode == HttpStatusCode.ServiceUnavailable)
-            {
-                _logger.LogError("Error occurred during call to AccuWeather API. API key may be exceeding service limits.\nStatus Code: {statusCode}, Reason: {reason}",
-                    response.StatusCode, response.ReasonPhrase);
-
-                return null;
-            }
-            else if (response.IsSuccessStatusCode)
+            if (response.IsSuccessStatusCode)
             {
                 string apiResponse = await response.Content.ReadAsStringAsync();
 
@@ -114,8 +105,7 @@ namespace InterviewProject.Controllers
             }
             else
             {
-                _logger.LogError("Error occurred during call to AccuWeather City Search API\nStatus Code: {statusCode}, Reason: {reason}",
-                    response.StatusCode, response.ReasonPhrase);
+                HandleInvalidResponse(response, CITY_SEARCH_API);
 
                 return new LocationKey();
             }
@@ -131,20 +121,7 @@ namespace InterviewProject.Controllers
         {
             using var response = await httpClient.GetAsync("http://dataservice.accuweather.com/forecasts/v1/daily/5day/" + locationKey + "?metric=true&apikey=" + _appSettings.AccuWeatherDevAPIKey);
 
-            if (response.StatusCode == HttpStatusCode.Unauthorized)
-            {
-                _logger.LogError("AccuWeather API key is not authorized to call 5 Days of Daily Forecasts API");
-
-                return null;
-            }
-            else if (response.StatusCode == HttpStatusCode.ServiceUnavailable)
-            {
-                _logger.LogError("Error occurred during call to AccuWeather API. API key may be exceeding service limits.\nStatus Code: {statusCode}, Reason: {reason}",
-                    response.StatusCode, response.ReasonPhrase);
-
-                return null;
-            }
-            else if (response.IsSuccessStatusCode)
+            if (response.IsSuccessStatusCode)
             {
                 string apiResponse = await response.Content.ReadAsStringAsync();
 
@@ -162,10 +139,25 @@ namespace InterviewProject.Controllers
             }
             else
             {
-                _logger.LogError("Error occurred during call to AccuWeather 5 Days of Daily Forecasts API\nStatus Code: {statusCode}, Reason: {reason}",
-                    response.StatusCode, response.ReasonPhrase);
+                HandleInvalidResponse(response, FIVE_DAYS_FORECAST_API);
 
                 return null;
+            }
+        }
+
+        private void HandleInvalidResponse(HttpResponseMessage response, string apiName)
+        {
+            switch (response.StatusCode)
+            {
+                case HttpStatusCode.Unauthorized:
+                    _logger.LogError($"AccuWeather API key is not authorized to call {apiName} API", apiName);
+                    break;
+                case HttpStatusCode.ServiceUnavailable:
+                    _logger.LogError($"Error occurred during call to AccuWeather API. API key may be exceeding service limits.\nStatus Code: {response.StatusCode}, Reason: {response.ReasonPhrase}");
+                    break;
+                default:
+                    _logger.LogError($"Error occurred during call to AccuWeather {apiName} API\nStatus Code: {response.StatusCode}, Reason: {response.ReasonPhrase}");
+                    break;
             }
         }
     }
